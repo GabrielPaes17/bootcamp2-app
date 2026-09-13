@@ -1,195 +1,189 @@
-// ===== Explorador de Países — script.js =====
+// ===== Pokédex Interativa - PokeAPI =====
 
-const API_BASE = "https://restcountries.com/v3.1";
+const API_URL = 'https://pokeapi.co/api/v2/';
+const MAX_POKEMON = 898;
 
-const campoBusca = document.getElementById("campo-busca");
-const botaoBuscar = document.getElementById("botao-buscar");
-const resultado = document.getElementById("resultado");
-const loadingOverlay = document.getElementById("loading-overlay");
-const filterBtns = document.querySelectorAll(".filter-btn");
-const suggestionBtns = document.querySelectorAll(".suggestion-btn");
+// Elementos da página
+const searchInput = document.getElementById('search-input');
+const btnSearch = document.getElementById('btn-search');
+const btnRandom = document.getElementById('btn-random');
+const resultArea = document.getElementById('result-area');
 
-let regiaoAtiva = "all";
+// Cores das barras de stat
+const statColors = {
+  hp: '#ff5959',
+  attack: '#f5ac78',
+  defense: '#78c850',
+  'special-attack': '#9b7ebd',
+  'special-defense': '#7bc8a8',
+  speed: '#6dabd4'
+};
 
-function formatarNumero(n) {
-  if (n == null) return "—";
-  return n.toLocaleString("pt-BR");
-}
+// ===== EVENTOS =====
+btnSearch.addEventListener('click', () => {
+  const query = searchInput.value.trim().toLowerCase();
+  if (query) {
+    buscarPorNome(query);
+  }
+});
 
-function nomeNativo(nativeName) {
-  if (!nativeName) return "";
-  const chaves = Object.keys(nativeName);
-  if (chaves.length === 0) return "";
-  return nativeName[chaves[0]].official || nativeName[chaves[0]].common || "";
-}
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    btnSearch.click();
+  }
+});
 
-function listaIdiomas(languages) {
-  if (!languages) return ["—"];
-  return Object.values(languages);
-}
+btnRandom.addEventListener('click', () => {
+  buscarAleatorio();
+});
 
-function listaMoedas(currencies) {
-  if (!currencies) return ["—"];
-  return Object.entries(currencies).map(([codigo, info]) =>
-    `${info.name} (${codigo}${info.symbol ? ", " + info.symbol : ""})`
-  );
-}
+// ===== BUSCAR POKÉMON POR NOME OU ID =====
+async function buscarPorNome(nomeOuId) {
+  resultArea.innerHTML = '<div class="loading">Carregando</div>';
 
-function mostrarLoading() { loadingOverlay.classList.remove("hidden"); }
-function esconderLoading() { loadingOverlay.classList.add("hidden"); }
-
-function renderizarErro(titulo, mensagem) {
-  resultado.innerHTML = `
-    <div class="error-message">
-      <div class="error-icon">😕</div>
-      <h2>${titulo}</h2>
-      <p>${mensagem}</p>
-    </div>
-  `;
-}
-
-function renderizarVazio() {
-  resultado.innerHTML = `
-    <div class="empty-message">
-      <div class="empty-icon">🔍</div>
-      <h2>Nenhum país encontrado</h2>
-      <p>Tente outro nome ou selecione uma região diferente.</p>
-    </div>
-  `;
-}
-
-function renderizarCard(pais) {
-  const nome = pais.name?.common || "Desconhecido";
-  const nativo = nomeNativo(pais.name?.nativeName);
-  const bandeira = pais.flags?.svg || pais.flags?.png || "";
-  const capital = pais.capital?.join(", ") || "—";
-  const populacao = formatarNumero(pais.population);
-  const area = formatarNumero(pais.area);
-  const idiomas = listaIdiomas(pais.languages).join(", ");
-  const moedas = listaMoedas(pais.currencies).join(", ");
-  const regiao = pais.region || "—";
-  const subregiao = pais.subregion || "";
-  const fuso = pais.timezones?.join(", ") || "—";
-
-  return `
-    <article class="country-card" style="animation-delay: ${Math.random() * 0.2}s">
-      <img class="card-flag" src="${bandeira}" alt="Bandeira de ${nome}" loading="lazy">
-      <div class="card-body">
-        <h2>${nome}</h2>
-        ${nativo && nativo !== nome ? `<p class="card-native-name">${nativo}</p>` : ""}
-        <div class="card-info">
-          <div class="info-item">
-            <span class="info-label">🏛️ Capital</span>
-            <span class="info-value">${capital}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">👥 População</span>
-            <span class="info-value">${populacao}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">📐 Área</span>
-            <span class="info-value">${area} km²</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">🗣️ Idiomas</span>
-            <span class="info-value languages">${idiomas}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">💰 Moeda(s)</span>
-            <span class="info-value">${moedas}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">🕐 Fuso</span>
-            <span class="info-value">${fuso}</span>
-          </div>
-        </div>
-        <div class="card-tags">
-          ${regiao !== "—" ? `<span class="tag region">${regiao}</span>` : ""}
-          ${subregiao ? `<span class="tag subregion">${subregiao}</span>` : ""}
-          ${capital !== "—" ? `<span class="tag capital">🏙️ ${capital}</span>` : ""}
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function renderizarPaises(paises) {
-  if (!paises || paises.length === 0) { renderizarVazio(); return; }
-  resultado.innerHTML = `<div class="countries-grid">${paises.map(renderizarCard).join("")}</div>`;
-}
-
-async function buscarPorNome(nome) {
-  mostrarLoading();
   try {
-    const resposta = await fetch(`${API_BASE}/name/${encodeURIComponent(nome)}`);
-    if (!resposta.ok) {
-      if (resposta.status === 404) {
-        renderizarErro("País não encontrado", `Não encontramos nenhum país com o nome "${nome}". Verifique a grafia ou tente em inglês.`);
+    const res = await fetch(API_URL + 'pokemon/' + nomeOuId);
+    if (!res.ok) throw new Error('Pokémon não encontrado');
+    const data = await res.json();
+    mostrarPokemon(data);
+  } catch (err) {
+    resultArea.innerHTML = '<div class="error-msg">⚠️ ' + err.message + '. Tente outro nome ou número.</div>';
+  }
+}
+
+// ===== BUSCAR POKÉMON ALEATÓRIO =====
+function buscarAleatorio() {
+  const id = Math.floor(Math.random() * MAX_POKEMON) + 1;
+  buscarPorNome(String(id));
+}
+
+// ===== MOSTRAR DADOS DO POKÉMON =====
+function mostrarPokemon(p) {
+  const nome = p.name;
+  const id = p.id;
+  const img = p.sprites.other['official-artwork'].front_default || p.sprites.front_default;
+  const tipos = p.types.map(t => t.type.name);
+  const altura = (p.height / 10).toFixed(1);
+  const peso = (p.weight / 10).toFixed(1);
+
+  // Montar badges de tipo
+  const badgesHTML = tipos.map(tipo => {
+    return '<span class="type-badge type-' + tipo + '">' + tipo + '</span>';
+  }).join('');
+
+  // Montar barras de stats
+  const statsHTML = p.stats.map(s => {
+    const nomeStat = s.stat.name;
+    const valor = s.base_stat;
+    const cor = statColors[nomeStat] || '#ccc';
+    const largura = Math.min((valor / 255) * 100, 100);
+    return '<div class="stat-row">' +
+      '<span class="stat-name">' + formatarStat(nomeStat) + '</span>' +
+      '<div class="stat-bar"><div class="stat-fill" style="width:' + largura + '%;background:' + cor + '"></div></div>' +
+      '<span class="stat-value">' + valor + '</span>' +
+      '</div>';
+  }).join('');
+
+  // Montar habilidades
+  const habilidadesHTML = p.abilities.map(a => {
+    const nome = a.ability.name.replace('-', ' ');
+    return '<span style="background:rgba(255,255,255,0.1);padding:0.2rem 0.6rem;border-radius:12px;font-size:0.8rem;margin:0.2rem;display:inline-block;">' + nome + '</span>';
+  }).join('');
+
+  resultArea.innerHTML =
+    '<div class="pokemon-detail">' +
+      '<img src="' + img + '" alt="' + nome + '">' +
+      '<h2>' + nome + '</h2>' +
+      '<p class="pokemon-id">#' + String(id).padStart(3, '0') + '</p>' +
+      '<div class="type-badges">' + badgesHTML + '</div>' +
+      '<div class="physical-info">' +
+        '<span>📏 ' + altura + ' m</span>' +
+        '<span>⚖️ ' + peso + ' kg</span>' +
+      '</div>' +
+      '<div style="margin-top:1rem;"><strong style="color:#ccc;font-size:0.85rem;">Habilidades:</strong><br>' + habilidadesHTML + '</div>' +
+      '<div class="stats">' +
+        '<h3 style="text-align:center;margin-bottom:0.5rem;color:#ffcb05;">Base Stats</h3>' +
+        statsHTML +
+      '</div>' +
+    '</div>';
+
+  // Buscar cadeia de evolução
+  buscarEvolucao(p.species.url);
+}
+
+// ===== BUSCAR CADEIA DE EVOLUÇÃO =====
+async function buscarEvolucao(speciesUrl) {
+  try {
+    const resSpecies = await fetch(speciesUrl);
+    const dataSpecies = await resSpecies.json();
+
+    const resEvo = await fetch(dataSpecies.evolution_chain.url);
+    const dataEvo = await resEvo.json();
+
+    const evolucoes = [];
+    let evo = dataEvo.chain;
+
+    while (evo) {
+      const nomeEvo = evo.species.name;
+      const urlEvo = evo.species.url;
+      // Extrair ID do Pokémon da URL da espécie
+      const parts = urlEvo.split('/');
+      const idEvo = parts[parts.length - 2];
+      evolucoes.push({ name: nomeEvo, id: idEvo });
+
+      // Pular para próxima evolução
+      if (evo.evolves_to.length > 0) {
+        evo = evo.evolves_to[0];
+        // Se tem mais de uma evolução (ex: Eevee), pegar todas
+        if (evo.evolves_to && evo.evolves_to.length > 1) {
+          for (let i = 1; i < evo.evolves_to.length; i++) {
+            const altEvo = evo.evolves_to[i];
+            const altNome = altEvo.species.name;
+            const altUrl = altEvo.species.url;
+            const altParts = altUrl.split('/');
+            const altId = altParts[altParts.length - 2];
+            evolucoes.push({ name: altNome, id: altId });
+          }
+        }
       } else {
-        renderizarErro("Erro na consulta", `A API retornou o código ${resposta.status}. Tente novamente em alguns instantes.`);
+        evo = null;
       }
-      return;
     }
-    const dados = await resposta.json();
-    renderizarPaises(dados);
-  } catch (erro) {
-    console.error("Erro ao buscar país:", erro);
-    renderizarErro("Erro de conexão", "Não foi possível acessar a API. Verifique sua conexão com a internet e tente novamente.");
-  } finally {
-    esconderLoading();
-  }
+
+    mostrarEvolucoes(evolucoes);
+  } catch (err) {
+    // Se não conseguir buscar evoluções, não mostra a seção
+    }
 }
 
-async function buscarPorRegiao(regiao) {
-  mostrarLoading();
-  try {
-    const url = regiao === "all" ? `${API_BASE}/all` : `${API_BASE}/region/${encodeURIComponent(regiao)}`;
-    const resposta = await fetch(url);
-    if (!resposta.ok) {
-      renderizarErro("Erro na consulta", `A API retornou o código ${resposta.status}. Tente novamente.`);
-      return;
-    }
-    const dados = await resposta.json();
-    renderizarPaises(dados);
-  } catch (erro) {
-    console.error("Erro ao buscar região:", erro);
-    renderizarErro("Erro de conexão", "Não foi possível acessar a API. Verifique sua conexão com a internet.");
-  } finally {
-    esconderLoading();
-  }
+// ===== MOSTRAR EVOLUÇÕES =====
+function mostrarEvolucoes(evolucoes) {
+  if (evolucoes.length <= 1) return;
+
+  const cardsHTML = evolucoes.map(evo => {
+    const imgEvo = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png';
+    return '<div class="pokemon-mini-card" onclick="buscarPorNome(\'' + evo.name + '\')">' +
+      '<img src="' + imgEvo + '" alt="' + evo.name + '">' +
+      '<p>' + evo.name + '</p>' +
+    '</div>';
+  }).join('');
+
+  const evoArea = document.createElement('div');
+  evoArea.className = 'evolution-area';
+  evoArea.innerHTML = '<h3>Evolução</h3><div class="evolution-list">' + cardsHTML + '</div>';
+
+  resultArea.appendChild(evoArea);
 }
 
-botaoBuscar.addEventListener("click", () => {
-  const termo = campoBusca.value.trim();
-  if (termo) {
-    filterBtns.forEach(b => b.classList.remove("active"));
-    document.querySelector('[data-region="all"]').classList.add("active");
-    regiaoAtiva = "all";
-    buscarPorNome(termo);
-  }
-});
-
-campoBusca.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") botaoBuscar.click();
-});
-
-filterBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterBtns.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    regiaoAtiva = btn.dataset.region;
-    campoBusca.value = "";
-    buscarPorRegiao(regiaoAtiva);
-  });
-});
-
-suggestionBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const termo = btn.dataset.term;
-    campoBusca.value = termo;
-    filterBtns.forEach(b => b.classList.remove("active"));
-    document.querySelector('[data-region="all"]').classList.add("active");
-    regiaoAtiva = "all";
-    buscarPorNome(termo);
-  });
-});
+// ===== FORMATAR NOME DO STAT =====
+function formatarStat(nome) {
+  const nomes = {
+    'hp': 'HP',
+    'attack': 'ATK',
+    'defense': 'DEF',
+    'special-attack': 'SP.ATK',
+    'special-defense': 'SP.DEF',
+    'speed': 'SPD'
+  };
+  return nomes[nome] || nome.toUpperCase();
+}
