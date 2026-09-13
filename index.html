@@ -3,76 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pokédex Interativa - Busque informações de qualquer Pokémon usando a PokeAPI">
+  <meta name="author" content="Gabriel Paes">
   <title>Pokédex Interativa</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
   <header>
-    <div class="header-content">
-      <div class="logo-icon">⚡</div>
-      <h1>Pokédex Interativa</h1>
-      <p class="subtitle">Pesquise qualquer Pokémon e descubra seus dados</p>
-    </div>
+    <h1>⚡ Pokédex Interativa</h1>
+    <p>Busque por nome ou número (1-898)</p>
   </header>
 
-  <main>
-    <section class="search-section">
-      <div class="search-container">
-        <input
-          type="text"
-          id="campo-busca"
-          placeholder="Nome ou número do Pokémon (ex: pikachu, 25, charizard)..."
-          autocomplete="off"
-        >
-        <button id="botao-buscar" title="Buscar Pokémon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          Buscar
-        </button>
-      </div>
-      <div class="type-filters">
-        <span class="filter-label">Filtrar por tipo:</span>
-        <button class="type-btn" data-type="fire" style="--type-color: #F08030">🔥 Fire</button>
-        <button class="type-btn" data-type="water" style="--type-color: #6890F0">💧 Water</button>
-        <button class="type-btn" data-type="grass" style="--type-color: #78C850">🌿 Grass</button>
-        <button class="type-btn" data-type="electric" style="--type-color: #F8D030">⚡ Electric</button>
-        <button class="type-btn" data-type="psychic" style="--type-color: #F85888">🔮 Psychic</button>
-        <button class="type-btn" data-type="dragon" style="--type-color: #7038F8">🐉 Dragon</button>
-        <button class="type-btn" data-type="ghost" style="--type-color: #705898">👻 Ghost</button>
-        <button class="type-btn" data-type="fighting" style="--type-color: #C03028">🥊 Fighting</button>
-      </div>
-    </section>
+  <div class="search-area">
+    <input type="text" id="search-input" placeholder="Ex: pikachu, 25, charizard...">
+    <button class="btn btn-search" id="btn-search">🔍 Buscar</button>
+    <button class="btn btn-random" id="btn-random">🎲 Aleatório</button>
+  </div>
 
-    <section id="resultado" class="results-section">
-      <div class="welcome-message">
-        <div class="welcome-icon">🎮</div>
-        <h2>Comece sua aventura!</h2>
-        <p>Digite o nome ou número de um Pokémon para ver seus dados, ou explore por tipo.</p>
-        <div class="suggestions">
-          <span>Tente:</span>
-          <button class="suggestion-btn" data-term="pikachu">⚡ Pikachu</button>
-          <button class="suggestion-btn" data-term="charizard">🔥 Charizard</button>
-          <button class="suggestion-btn" data-term="mewtwo">🔮 Mewtwo</button>
-          <button class="suggestion-btn" data-term="gengar">👻 Gengar</button>
-          <button class="suggestion-btn" data-term="lucario">🥊 Lucario</button>
-        </div>
-      </div>
-    </section>
+  <main id="result-area">
   </main>
 
   <footer>
-    <p>Pokédex Interativa &copy; 2026 — Dados da <a href="https://pokeapi.co" target="_blank" rel="noopener">PokéAPI</a></p>
+    <p>Desenvolvido por Gabriel Paes | Dados da <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a></p>
   </footer>
-
-  <div id="loading-overlay" class="loading-overlay hidden">
-    <div class="spinner"></div>
-    <p>Buscando Pokémon...</p>
-  </div>
 
   <script src="script.js"></script>
 </body>
