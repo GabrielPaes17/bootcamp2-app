@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Pokédex Interativa - Busque informações de qualquer Pokémon usando a PokeAPI">
+  <meta name="description" content="Pokédex Interativa - Busque Pokémon na PokeAPI e monte seu time salvo no Supabase">
   <meta name="author" content="Gabriel Paes">
   <title>Pokédex Interativa</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
@@ -13,7 +13,7 @@
 
   <header>
     <h1>⚡ Pokédex Interativa</h1>
-    <p>Busque por nome ou número (1-898)</p>
+    <p>Busque por nome ou número (1-898) e monte seu time!</p>
   </header>
 
   <div class="search-area">
@@ -23,12 +23,20 @@
   </div>
 
   <main id="result-area">
+    <!-- Resultado da busca aparece aqui -->
   </main>
 
+  <section id="team-area" class="team-area">
+    <h2>📋 Meu Time</h2>
+    <div id="team-list" class="team-list">
+      <!-- Pokémon salvos aparecem aqui -->
+    </div>
+  </section>
+
   <footer>
-    <p>Desenvolvido por Gabriel Paes | Dados da <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a></p>
+    <p>Desenvolvido por Gabriel Paes | Dados da <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a> | Persistência via <a href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a></p>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

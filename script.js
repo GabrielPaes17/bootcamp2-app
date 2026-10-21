@@ -1,13 +1,25 @@
-// ===== Pokédex Interativa - PokeAPI =====
+// ===== Pokédex Interativa - PokeAPI + Supabase =====
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// Conexao com o banco Supabase
+const supabase = createClient(
+  "https://fotturdcuhnrishjiehy.supabase.co",
+  "sb_publishable_QG-o-bWzrZ5YRclzE8OKsg_spvzVx3r"
+);
 
 const API_URL = 'https://pokeapi.co/api/v2/';
 const MAX_POKEMON = 898;
 
-// Elementos da página
+// Elementos da pagina
 const searchInput = document.getElementById('search-input');
 const btnSearch = document.getElementById('btn-search');
 const btnRandom = document.getElementById('btn-random');
 const resultArea = document.getElementById('result-area');
+const teamList = document.getElementById('team-list');
+
+// Guarda o Pokemon exibido no momento (para o botao Favoritar)
+let pokemonAtual = null;
 
 // Cores das barras de stat
 const statColors = {
@@ -22,25 +34,18 @@ const statColors = {
 // ===== EVENTOS =====
 btnSearch.addEventListener('click', () => {
   const query = searchInput.value.trim().toLowerCase();
-  if (query) {
-    buscarPorNome(query);
-  }
+  if (query) buscarPorNome(query);
 });
 
 searchInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    btnSearch.click();
-  }
+  if (e.key === 'Enter') btnSearch.click();
 });
 
-btnRandom.addEventListener('click', () => {
-  buscarAleatorio();
-});
+btnRandom.addEventListener('click', () => buscarAleatorio());
 
-// ===== BUSCAR POKÉMON POR NOME OU ID =====
+// ===== BUSCAR POKEMON POR NOME OU ID (PokeAPI) =====
 async function buscarPorNome(nomeOuId) {
   resultArea.innerHTML = '<div class="loading">Carregando</div>';
-
   try {
     const res = await fetch(API_URL + 'pokemon/' + nomeOuId);
     if (!res.ok) throw new Error('Pokémon não encontrado');
@@ -51,27 +56,25 @@ async function buscarPorNome(nomeOuId) {
   }
 }
 
-// ===== BUSCAR POKÉMON ALEATÓRIO =====
+// ===== BUSCAR POKEMON ALEATORIO =====
 function buscarAleatorio() {
   const id = Math.floor(Math.random() * MAX_POKEMON) + 1;
   buscarPorNome(String(id));
 }
 
-// ===== MOSTRAR DADOS DO POKÉMON =====
+// ===== MOSTRAR DADOS DO POKEMON =====
 function mostrarPokemon(p) {
-  const nome = p.name;
-  const id = p.id;
+  pokemonAtual = { nome: p.name, numero: p.id };
+
   const img = p.sprites.other['official-artwork'].front_default || p.sprites.front_default;
   const tipos = p.types.map(t => t.type.name);
   const altura = (p.height / 10).toFixed(1);
   const peso = (p.weight / 10).toFixed(1);
 
-  // Montar badges de tipo
-  const badgesHTML = tipos.map(tipo => {
-    return '<span class="type-badge type-' + tipo + '">' + tipo + '</span>';
-  }).join('');
+  const badgesHTML = tipos.map(tipo =>
+    '<span class="type-badge type-' + tipo + '">' + tipo + '</span>'
+  ).join('');
 
-  // Montar barras de stats
   const statsHTML = p.stats.map(s => {
     const nomeStat = s.stat.name;
     const valor = s.base_stat;
@@ -84,106 +87,112 @@ function mostrarPokemon(p) {
       '</div>';
   }).join('');
 
-  // Montar habilidades
-  const habilidadesHTML = p.abilities.map(a => {
-    const nome = a.ability.name.replace('-', ' ');
-    return '<span style="background:rgba(255,255,255,0.1);padding:0.2rem 0.6rem;border-radius:12px;font-size:0.8rem;margin:0.2rem;display:inline-block;">' + nome + '</span>';
-  }).join('');
-
   resultArea.innerHTML =
     '<div class="pokemon-detail">' +
-      '<img src="' + img + '" alt="' + nome + '">' +
-      '<h2>' + nome + '</h2>' +
-      '<p class="pokemon-id">#' + String(id).padStart(3, '0') + '</p>' +
+      '<img src="' + img + '" alt="' + p.name + '">' +
+      '<h2>' + p.name + '</h2>' +
+      '<p class="pokemon-id">#' + String(p.id).padStart(3, '0') + '</p>' +
       '<div class="type-badges">' + badgesHTML + '</div>' +
       '<div class="physical-info">' +
         '<span>📏 ' + altura + ' m</span>' +
         '<span>⚖️ ' + peso + ' kg</span>' +
       '</div>' +
-      '<div style="margin-top:1rem;"><strong style="color:#ccc;font-size:0.85rem;">Habilidades:</strong><br>' + habilidadesHTML + '</div>' +
+      '<button class="btn btn-fav" id="btn-fav">⭐ Adicionar ao meu time</button>' +
       '<div class="stats">' +
-        '<h3 style="text-align:center;margin-bottom:0.5rem;color:#ffcb05;">Base Stats</h3>' +
+        '<h3 style="text-align:center;margin:0.8rem 0 0.5rem;color:#ffcb05;">Base Stats</h3>' +
         statsHTML +
       '</div>' +
     '</div>';
 
-  // Buscar cadeia de evolução
-  buscarEvolucao(p.species.url);
-}
-
-// ===== BUSCAR CADEIA DE EVOLUÇÃO =====
-async function buscarEvolucao(speciesUrl) {
-  try {
-    const resSpecies = await fetch(speciesUrl);
-    const dataSpecies = await resSpecies.json();
-
-    const resEvo = await fetch(dataSpecies.evolution_chain.url);
-    const dataEvo = await resEvo.json();
-
-    const evolucoes = [];
-    let evo = dataEvo.chain;
-
-    while (evo) {
-      const nomeEvo = evo.species.name;
-      const urlEvo = evo.species.url;
-      // Extrair ID do Pokémon da URL da espécie
-      const parts = urlEvo.split('/');
-      const idEvo = parts[parts.length - 2];
-      evolucoes.push({ name: nomeEvo, id: idEvo });
-
-      // Pular para próxima evolução
-      if (evo.evolves_to.length > 0) {
-        evo = evo.evolves_to[0];
-        // Se tem mais de uma evolução (ex: Eevee), pegar todas
-        if (evo.evolves_to && evo.evolves_to.length > 1) {
-          for (let i = 1; i < evo.evolves_to.length; i++) {
-            const altEvo = evo.evolves_to[i];
-            const altNome = altEvo.species.name;
-            const altUrl = altEvo.species.url;
-            const altParts = altUrl.split('/');
-            const altId = altParts[altParts.length - 2];
-            evolucoes.push({ name: altNome, id: altId });
-          }
-        }
-      } else {
-        evo = null;
-      }
-    }
-
-    mostrarEvolucoes(evolucoes);
-  } catch (err) {
-    // Se não conseguir buscar evoluções, não mostra a seção
-    }
-}
-
-// ===== MOSTRAR EVOLUÇÕES =====
-function mostrarEvolucoes(evolucoes) {
-  if (evolucoes.length <= 1) return;
-
-  const cardsHTML = evolucoes.map(evo => {
-    const imgEvo = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png';
-    return '<div class="pokemon-mini-card" onclick="buscarPorNome(\'' + evo.name + '\')">' +
-      '<img src="' + imgEvo + '" alt="' + evo.name + '">' +
-      '<p>' + evo.name + '</p>' +
-    '</div>';
-  }).join('');
-
-  const evoArea = document.createElement('div');
-  evoArea.className = 'evolution-area';
-  evoArea.innerHTML = '<h3>Evolução</h3><div class="evolution-list">' + cardsHTML + '</div>';
-
-  resultArea.appendChild(evoArea);
+  document.getElementById('btn-fav').addEventListener('click', () => {
+    salvarFavorito(pokemonAtual.nome, pokemonAtual.numero);
+  });
 }
 
 // ===== FORMATAR NOME DO STAT =====
 function formatarStat(nome) {
   const nomes = {
-    'hp': 'HP',
-    'attack': 'ATK',
-    'defense': 'DEF',
-    'special-attack': 'SP.ATK',
-    'special-defense': 'SP.DEF',
-    'speed': 'SPD'
+    'hp': 'HP', 'attack': 'ATK', 'defense': 'DEF',
+    'special-attack': 'SP.ATK', 'special-defense': 'SP.DEF', 'speed': 'SPD'
   };
   return nomes[nome] || nome.toUpperCase();
 }
+
+// ===================================================
+// ===== PERSISTENCIA COM SUPABASE (CRUD do time) ====
+// ===================================================
+
+// CREATE - salvar um Pokemon no time
+async function salvarFavorito(nome, numero) {
+  const { error } = await supabase
+    .from('time_pokemon')
+    .insert({ nome_pokemon: nome, numero: numero });
+
+  if (error) {
+    alert('Erro ao salvar: ' + error.message);
+    console.error(error);
+  } else {
+    listarFavoritos();
+  }
+}
+
+// READ - listar o time salvo
+async function listarFavoritos() {
+  const { data, error } = await supabase
+    .from('time_pokemon')
+    .select('*')
+    .order('created_at');
+
+  if (error) {
+    teamList.innerHTML = '<p class="error-msg">Erro ao carregar o time.</p>';
+    console.error(error);
+    return;
+  }
+  renderizarLista(data);
+}
+
+// DELETE - remover um Pokemon do time
+async function removerFavorito(id) {
+  const { error } = await supabase
+    .from('time_pokemon')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    alert('Erro ao remover: ' + error.message);
+    console.error(error);
+  } else {
+    listarFavoritos();
+  }
+}
+
+// Desenha a lista do time na tela
+function renderizarLista(lista) {
+  if (!lista || lista.length === 0) {
+    teamList.innerHTML = '<p class="team-empty">Seu time está vazio. Busque um Pokémon e clique em “⭐ Adicionar ao meu time”.</p>';
+    return;
+  }
+
+  teamList.innerHTML = lista.map(item => {
+    const sprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + item.numero + '.png';
+    return '<div class="team-card">' +
+      '<img src="' + sprite + '" alt="' + item.nome_pokemon + '">' +
+      '<p class="team-name">' + item.nome_pokemon + '</p>' +
+      '<p class="team-num">#' + String(item.numero).padStart(3, '0') + '</p>' +
+      '<button class="btn-remove" data-id="' + item.id + '">🗑️ Remover</button>' +
+    '</div>';
+  }).join('');
+
+  // Liga os botoes de remover
+  teamList.querySelectorAll('.btn-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      removerFavorito(btn.getAttribute('data-id'));
+    });
+  });
+}
+
+// Carrega o time assim que a pagina abre
+listarFavoritos();
+
+// Expoe a funcao de busca para uso global (ex.: clicar em evolucoes)
+window.buscarPorNome = buscarPorNome;
