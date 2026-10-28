@@ -37,9 +37,7 @@ Build local (opcional):
 
 - **SQ2 — Tags:** imagem publicada com as tags `1.0`, `1.1` e `latest`.
 - **SQ3 — Overview:** repositório público e com descrição no Docker Hub.
-- **SQ4 — Múltiplos containers:** dois containers da mesma imagem rodando ao mesmo tempo nas portas `8080` e `8081`. Evidência abaixo:
-
-![Evidência SQ4](evidencia-sq4.png)
+- **SQ4 — Múltiplos containers:** dois containers da mesma imagem rodando ao mesmo tempo nas portas `8080` e `8081`. Evidência: arquivo `evidencia-sq4.txt` (saída do `docker ps`) e imagem `evidencia-sq4.png`.
 
 ## 👤 Autor
 
