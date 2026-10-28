@@ -1,0 +1,3 @@
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED          STATUS          PORTS                                     NAMES
+32131453ba02   gabriel0paes17/bootcamp2-app:latest   "/docker-entrypoint.…"   56 minutes ago   Up 56 minutes   0.0.0.0:8081->80/tcp, [::]:8081->80/tcp   pokedex2
+a846e757c963   bootcamp2-app                         "/docker-entrypoint.…"   2 hours ago      Up 2 hours      0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   pokedex

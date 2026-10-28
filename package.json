@@ -1,0 +1,11 @@
+{
+  "name": "bootcamp2-app",
+  "version": "1.0.0",
+  "description": "Pokedex Interativa - Bootcamp II",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
