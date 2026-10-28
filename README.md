@@ -42,4 +42,3 @@ Build local (opcional):
 ## 👤 Autor
 
 Gabriel da Conceição Paes — GabrielPaes17
-EOF
