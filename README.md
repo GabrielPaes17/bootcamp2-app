@@ -15,6 +15,7 @@ Aplicação web interativa que consome a **PokeAPI** para buscar informações d
 - PokeAPI (REST)
 - Supabase (persistência em banco de dados)
 - Docker + Nginx (nginx:alpine)
+- Jest + GitHub Actions (testes automáticos / CI)
 
 ## 💾 Persistência (Etapa 02 - Parte A)
 
