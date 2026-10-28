@@ -1,4 +1,4 @@
-cat > README.md << 'EOF'
+cat > README.md << 'FIM'
 # ⚡ Pokédex Interativa — Bootcamp II
 
 Aplicação web interativa que consome a **PokeAPI** para buscar informações de Pokémon, com um "Meu Time" persistido em banco de dados real (**Supabase**) e empacotada com **Docker**.
@@ -18,11 +18,9 @@ Aplicação web interativa que consome a **PokeAPI** para buscar informações d
 
 ## 💾 Persistência (Etapa 02 - Parte A)
 
-O "Meu Time" de Pokémon é salvo em um banco de dados real no **Supabase**, na tabela `time_pokemon` (campos: `id`, `created_at`, `nome_pokemon`, `numero`). O app faz **CRUD** (criar, listar e remover) via `@supabase/supabase-js`, usando a Publishable key (chave pública). As políticas de RLS estão abertas por se tratar de um projeto acadêmico.
+O "Meu Time" de Pokémon é salvo no **Supabase**, na tabela `time_pokemon` (campos: `id`, `created_at`, `nome_pokemon`, `numero`). O app faz **CRUD** via `@supabase/supabase-js`, usando a Publishable key. As políticas de RLS estão abertas por ser projeto acadêmico.
 
 ## 🐳 Como rodar com Docker (Etapa 02 - Parte B)
-
-Puxar a imagem e rodar:
 
     docker run -d -p 8080:80 gabriel0paes17/bootcamp2-app:latest
 
@@ -33,13 +31,20 @@ Build local (opcional):
     docker build -t bootcamp2-app .
     docker run -d -p 8080:80 bootcamp2-app
 
+## 🧪 Testes (Etapa 03)
+
+    npm install
+    npm test
+
+Os testes rodam automaticamente no GitHub Actions a cada push/PR na branch main (workflow em `.github/workflows/ci.yml`).
+
 ## 🏅 Sidequests
 
 - **SQ2 — Tags:** imagem publicada com as tags `1.0`, `1.1` e `latest`.
 - **SQ3 — Overview:** repositório público e com descrição no Docker Hub.
-- **SQ4 — Múltiplos containers:** dois containers da mesma imagem rodando ao mesmo tempo nas portas `8080` e `8081`. Evidência: arquivo `evidencia-sq4.txt` (saída do `docker ps`) e imagem `evidencia-sq4.png`.
+- **SQ4 — Múltiplos containers:** dois containers da mesma imagem nas portas `8080` e `8081`. Evidência: `evidencia-sq4.txt` (saída do `docker ps`) e `evidencia-sq4.png`.
 
 ## 👤 Autor
 
 Gabriel da Conceição Paes — GabrielPaes17
-EOF
+FIM
