@@ -1,49 +1,96 @@
-# ⚡ Pokédex Interativa — Bootcamp II
+# Pokédex — Bootcamp II (Etapa 03)
 
-Aplicação web interativa que consome a **PokeAPI** para buscar informações de Pokémon, com um "Meu Time" persistido em banco de dados real (**Supabase**) e empacotada com **Docker**.
+Aplicação web de uma **Pokédex** feita com HTML, CSS e JavaScript, que consome a **PokeAPI** para exibir os Pokémon e usa o **Supabase** (PostgreSQL) para persistir um "Meu Time" em um banco real. O projeto é conteinerizado com **Docker** e conta com **testes automatizados (Jest)** e **Integração Contínua (GitHub Actions)**.
 
-## 🔗 Links
+---
+
+## 👥 Integrantes
+
+| Nome | Usuário GitHub | Função |
+|------|----------------|--------|
+| Gabriel Paes | [@GabrielPaes17](https://github.com/GabrielPaes17) | Desenvolvimento completo |
+
+---
+
+## 🔗 Links do projeto
 
 - **Repositório (GitHub):** https://github.com/GabrielPaes17/bootcamp2-app
-- **GitHub Pages:** https://gabrielpaes17.github.io/bootcamp2-app/
-- **Docker Hub:** https://hub.docker.com/r/gabriel0paes17/bootcamp2-app
+- **Site publicado (GitHub Pages):** https://gabrielpaes17.github.io/bootcamp2-app/
+- **Imagem no Docker Hub:** https://hub.docker.com/r/gabriel0paes17/bootcamp2-app
 
-## 🧩 Tecnologias
+---
 
-- HTML5, CSS3, JavaScript (ES6+)
-- PokeAPI (REST)
-- Supabase (persistência em banco de dados)
-- Docker + Nginx (nginx:alpine)
-- Jest + GitHub Actions (testes automáticos / CI)
+## 📌 Sobre a aplicação
 
-## 💾 Persistência (Etapa 02 - Parte A)
+A Pokédex permite:
 
-O "Meu Time" de Pokémon é salvo no **Supabase**, na tabela `time_pokemon` (campos: `id`, `created_at`, `nome_pokemon`, `numero`). O app faz **CRUD** via `@supabase/supabase-js`, usando a Publishable key. As políticas de RLS estão abertas por ser projeto acadêmico.
+- Listar e visualizar Pokémon com seus dados (nome, imagem, tipos etc.);
+- Salvar Pokémon no "Meu Time" em um banco de dados real;
+- Listar e remover os Pokémon salvos (CRUD: criar / listar / excluir).
 
-## 🐳 Como rodar com Docker (Etapa 02 - Parte B)
+### API utilizada — PokeAPI
 
-    docker run -d -p 8080:80 gabriel0paes17/bootcamp2-app:latest
+Os dados dos Pokémon são obtidos em tempo real da [PokeAPI](https://pokeapi.co/), uma API pública e gratuita, via requisições HTTP (fetch).
 
-Depois acesse: http://localhost:8080
+### Banco de dados — Supabase (PostgreSQL)
 
-Build local (opcional):
+A persistência é feita no **Supabase** (PostgreSQL), na tabela `time_pokemon`. A aplicação se conecta via `@supabase/supabase-js@2` usando a **chave pública (Publishable / anon)**.
 
-    docker build -t bootcamp2-app .
-    docker run -d -p 8080:80 bootcamp2-app
+**CRUD implementado:** criar, listar e excluir.
 
-## 🧪 Testes (Etapa 03)
+> ⚠️ **Limitação conhecida:** o acesso usa a chave pública (anon) com **RLS (Row Level Security) aberto**, por ser um projeto acadêmico. A chave usada é sempre a **pública**, nunca a secreta.
 
-    npm install
-    npm test
+---
 
-Os testes rodam automaticamente no GitHub Actions a cada push/PR na branch main (workflow em `.github/workflows/ci.yml`).
+## 🛠️ Tecnologias
 
-## 🏅 Sidequests
+- **Front-end:** HTML, CSS, JavaScript
+- **API:** PokeAPI
+- **Banco de dados:** Supabase (PostgreSQL)
+- **Conteinização:** Docker (imagem base `nginx:alpine`)
+- **Testes:** Jest
+- **CI/CD:** GitHub Actions
 
-- **SQ2 — Tags:** imagem publicada com as tags `1.0`, `1.1` e `latest`.
-- **SQ3 — Overview:** repositório público e com descrição no Docker Hub.
-- **SQ4 — Múltiplos containers:** dois containers da mesma imagem nas portas `8080` e `8081`. Evidência: `evidencia-sq4.txt` (saída do `docker ps`) e `evidencia-sq4.png`.
+---
 
-## 👤 Autor
+## ▶️ Como rodar localmente
 
-Gabriel da Conceição Paes — GabrielPaes17
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/GabrielPaes17/bootcamp2-app.git
+   cd bootcamp2-app
+   ```
+2. Suba um servidor local simples:
+   ```bash
+   python3 -m http.server 8080
+   ```
+3. Acesse: `http://localhost:8080`
+
+---
+
+## 🐳 Como rodar com Docker
+
+```bash
+docker run -p 8080:80 gabriel0paes17/bootcamp2-app:latest
+```
+
+Depois acesse: `http://localhost:8080`
+
+**Tags disponíveis:** `1.0`, `1.1`, `latest`
+
+---
+
+## 🧪 Como rodar os testes
+
+```bash
+npm install
+npm test
+```
+
+Os testes validam as funções de `validacao.js` (`validarEntrada` e `formatarNome`).
+
+---
+
+## ⚙️ CI e proteção da branch
+
+O repositór
